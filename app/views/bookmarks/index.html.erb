@@ -16,16 +16,8 @@
 
       <% @bookmarks.each do |bookmark| %>
       <tr>
-        <td>
-          <a href="/users/<%= bookmark.user.id %>">
-            <%= bookmark.user.email %>
-          </a>
-        </td>
-        <td>
-          <a href="/movies/<%= bookmark.movie.id %>">
-            <%= bookmark.movie.title %>
-          </a>
-        </td>
+        <td><%= bookmark.user.email %></td>
+        <td><%= bookmark.movie.title %></td>
         <td>
           <a href="/bookmarks/<%= bookmark.id %>" class="btn btn-primary">Show</a>
           
