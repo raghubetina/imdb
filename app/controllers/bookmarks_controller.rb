@@ -10,7 +10,8 @@ class BookmarksController < ApplicationController
   end
 
   def index
-    @bookmarks = current_user.bookmarks.page(params[:page])
+    @q = Bookmark.ransack(params[:q])
+    @bookmarks = @q.result(:distinct => true).includes(:movie, :user).page(params[:page]).per(10)
 
     render("bookmarks/index.html.erb")
   end
@@ -30,13 +31,20 @@ class BookmarksController < ApplicationController
   def create
     @bookmark = Bookmark.new
 
-    @bookmark.user_id = params[:user_id]
     @bookmark.movie_id = params[:movie_id]
+    @bookmark.user_id = params[:user_id]
 
     save_status = @bookmark.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Bookmark created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/bookmarks/new", "/create_bookmark"
+        redirect_to("/bookmarks")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Bookmark created successfully.")
+      end
     else
       render("bookmarks/new.html.erb")
     end
@@ -51,13 +59,20 @@ class BookmarksController < ApplicationController
   def update
     @bookmark = Bookmark.find(params[:id])
 
-    @bookmark.user_id = params[:user_id]
     @bookmark.movie_id = params[:movie_id]
+    @bookmark.user_id = params[:user_id]
 
     save_status = @bookmark.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Bookmark updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/bookmarks/#{@bookmark.id}/edit", "/update_bookmark"
+        redirect_to("/bookmarks/#{@bookmark.id}", :notice => "Bookmark updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Bookmark updated successfully.")
+      end
     else
       render("bookmarks/edit.html.erb")
     end
@@ -71,7 +86,7 @@ class BookmarksController < ApplicationController
     if URI(request.referer).path == "/bookmarks/#{@bookmark.id}"
       redirect_to("/", :notice => "Bookmark deleted.")
     else
-      redirect_to(:back, :notice => "Bookmark deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Bookmark deleted.")
     end
   end
 end

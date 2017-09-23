@@ -3,7 +3,7 @@
 *.swo
 *.swp
 /.bundle
-/.env.local
+/.env*
 /coverage/*
 /db/*.sqlite3
 /log/*
@@ -11,7 +11,6 @@
 /public/assets
 /tags
 /tmp/*
-/vendor/*
+/vendor/cache/*
+/vendor/bundle
 !/vendor/assets/
-.env
-

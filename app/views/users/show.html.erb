@@ -11,9 +11,6 @@
       <dt>Password</dt>
       <dd><%= @user.password %></dd>
 
-      <dt>Username</dt>
-      <dd><%= @user.username %></dd>
-
     </dl>
 
     <div class="btn-group btn-group-justified">
@@ -36,7 +33,7 @@
       <% @user.bookmarks.each do |bookmark| %>
         <li class="list-group-item">
           <a href="/bookmarks/<%= bookmark.id %>">
-            <%= bookmark.user_id %>
+            <%= bookmark.movie_id %>
           </a>
           <div class="btn-group btn-group-xs pull-right">
             <a href="/bookmarks/<%= bookmark.id %>" class="btn btn-primary">
@@ -50,6 +47,37 @@
                 <i class="fa fa-trash-o"></i>
               </a>
             <% end %>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<!-- A User has many movies -->
+
+<div class="row">
+  <div class="col-md-12">
+    <ul class="list-group">
+      <li class="list-group-item list-group-item-info">
+        Movies
+      </li>
+
+      <% @user.movies.each do |movie| %>
+        <li class="list-group-item">
+          <a href="/movies/<%= movie.id %>">
+            <%= movie.title %>
+          </a>
+          <div class="btn-group btn-group-xs pull-right">
+            <a href="/movies/<%= movie.id %>" class="btn btn-primary">
+              <i class="fa fa-search-plus"></i>
+            </a>
+            <a href="/movies/<%= movie.id %>/edit" class="btn btn-warning">
+              <i class="fa fa-edit"></i>
+            </a>
+            <a href="/delete_movie/<%= movie.id %>" class="btn btn-danger" rel="nofollow">
+              <i class="fa fa-trash-o"></i>
+            </a>
           </div>
         </li>
       <% end %>

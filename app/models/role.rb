@@ -1,4 +1,4 @@
-class Character < ApplicationRecord
+class Role < ApplicationRecord
   # Direct associations
 
   belongs_to :actor

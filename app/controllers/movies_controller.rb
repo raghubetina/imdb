@@ -1,13 +1,14 @@
 class MoviesController < ApplicationController
   def index
-    @movies = Movie.page(params[:page])
+    @q = Movie.ransack(params[:q])
+    @movies = @q.result(:distinct => true).includes(:roles, :bookmarks, :director, :actors, :users).page(params[:page]).per(10)
 
     render("movies/index.html.erb")
   end
 
   def show
     @bookmark = Bookmark.new
-    @character = Character.new
+    @role = Role.new
     @movie = Movie.find(params[:id])
 
     render("movies/show.html.erb")
@@ -23,13 +24,20 @@ class MoviesController < ApplicationController
     @movie = Movie.new
 
     @movie.title = params[:title]
-    @movie.duration = params[:duration]
+    @movie.year = params[:year]
     @movie.director_id = params[:director_id]
 
     save_status = @movie.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Movie created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/movies/new", "/create_movie"
+        redirect_to("/movies")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Movie created successfully.")
+      end
     else
       render("movies/new.html.erb")
     end
@@ -45,13 +53,20 @@ class MoviesController < ApplicationController
     @movie = Movie.find(params[:id])
 
     @movie.title = params[:title]
-    @movie.duration = params[:duration]
+    @movie.year = params[:year]
     @movie.director_id = params[:director_id]
 
     save_status = @movie.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Movie updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/movies/#{@movie.id}/edit", "/update_movie"
+        redirect_to("/movies/#{@movie.id}", :notice => "Movie updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Movie updated successfully.")
+      end
     else
       render("movies/edit.html.erb")
     end
@@ -65,7 +80,7 @@ class MoviesController < ApplicationController
     if URI(request.referer).path == "/movies/#{@movie.id}"
       redirect_to("/", :notice => "Movie deleted.")
     else
-      redirect_to(:back, :notice => "Movie deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Movie deleted.")
     end
   end
 end

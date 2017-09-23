@@ -1,12 +1,13 @@
 class ActorsController < ApplicationController
   def index
-    @actors = Actor.page(params[:page])
+    @q = Actor.ransack(params[:q])
+    @actors = @q.result(:distinct => true).includes(:roles, :movies).page(params[:page]).per(10)
 
     render("actors/index.html.erb")
   end
 
   def show
-    @character = Character.new
+    @role = Role.new
     @actor = Actor.find(params[:id])
 
     render("actors/show.html.erb")
@@ -22,12 +23,19 @@ class ActorsController < ApplicationController
     @actor = Actor.new
 
     @actor.name = params[:name]
-    @actor.bio = params[:bio]
+    @actor.dob = params[:dob]
 
     save_status = @actor.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Actor created successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/actors/new", "/create_actor"
+        redirect_to("/actors")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Actor created successfully.")
+      end
     else
       render("actors/new.html.erb")
     end
@@ -43,12 +51,19 @@ class ActorsController < ApplicationController
     @actor = Actor.find(params[:id])
 
     @actor.name = params[:name]
-    @actor.bio = params[:bio]
+    @actor.dob = params[:dob]
 
     save_status = @actor.save
 
     if save_status == true
-      redirect_to(:back, :notice => "Actor updated successfully.")
+      referer = URI(request.referer).path
+
+      case referer
+      when "/actors/#{@actor.id}/edit", "/update_actor"
+        redirect_to("/actors/#{@actor.id}", :notice => "Actor updated successfully.")
+      else
+        redirect_back(:fallback_location => "/", :notice => "Actor updated successfully.")
+      end
     else
       render("actors/edit.html.erb")
     end
@@ -62,7 +77,7 @@ class ActorsController < ApplicationController
     if URI(request.referer).path == "/actors/#{@actor.id}"
       redirect_to("/", :notice => "Actor deleted.")
     else
-      redirect_to(:back, :notice => "Actor deleted.")
+      redirect_back(:fallback_location => "/", :notice => "Actor deleted.")
     end
   end
 end
